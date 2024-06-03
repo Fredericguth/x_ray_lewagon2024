@@ -1,52 +1,73 @@
 import os
 import cv2
-from PIL import Image, ImageOps
+import numpy as np
+from PIL import Image, ImageOps, ImageEnhance
 
 def augment_images(directory):
     '''
     Applies augmentation to files in the 'Bone Break Classification' dataset.
-    Applies a blurring effect and a mirror effect.
+    Augmentations include blurring, mirroring, rotating, brightness adjustment and contrast adjustment
     '''
-    for root, dirs, files in os.walk(directory):  # cycles through the directory
-        for dir_name in dirs:  # iterates over folders in the subdirectory
-            if dir_name in ['Train', 'Test']:  # opens only 'Train' and 'Test'
-                subdir = os.path.join(root, dir_name)  # makes path to 'Train' or 'Test'
-                for subroot, subdirs, subfiles in os.walk(subdir):  # walks through 'Train'/'Test'
-                    for file in subfiles:  # iterates over files
-                        if file.endswith(('.png', '.jpg', '.jpeg', '.bmp')):  # if file is an image
-                            file_path = os.path.join(subroot, file)  # gets file path
-                            print(f'Processing file: {file_path}')  # print file path for debugging
+    for root, dirs, files in os.walk(directory):
+        for dir_name in dirs:
+            if dir_name in ['Train', 'Test']:
+                subdir = os.path.join(root, dir_name)
+                for subroot, subdirs, subfiles in os.walk(subdir):
+                    for file in subfiles:
+                        if file.endswith(('.png', '.jpg', '.jpeg', '.bmp')):
+
+                            file_path = os.path.join(subroot, file)
+
+                            print(f'Processing file: {file_path}')
 
                             if not os.path.exists(file_path):
                                 print(f'Error: File does not exist - {file_path}')
                                 continue
 
                             try:
-                                '''
-                                Augmentation already applied:
+                                img = cv2.imread(file_path)
+                                
+                                if img is None:
+                                    print(f'Warning: Could not read image file {file_path}')
+                                    continue
 
-                                    img = cv2.imread(file_path)  # reads the image
-                                    if img is None:
-                                        print(f'Warning: Could not read image file {file_path}')
-                                        continue
+                                # Blurring the image
+                                blurred = cv2.GaussianBlur(img, (25, 25), 0)
+                                blurred_path = os.path.join(subroot, f'blurred_{file}')
+                                cv2.imwrite(blurred_path, blurred)
 
-                                    # Blurring the image
-                                    blurred = cv2.GaussianBlur(img, (15, 15), 0)  # applies a blur
-                                    blurred_path = os.path.join(subroot, f'blurred_{file}')  # creates the path for the blurred image
-                                    cv2.imwrite(blurred_path, blurred)  # saves the blurred image
+                                # Mirroring the image
+                                img_pil = Image.open(file_path)
+                                mirrored = ImageOps.mirror(img_pil)
+                                mirrored_path = os.path.join(subroot, f'mirrored_{file}')
+                                mirrored.save(mirrored_path)
 
-                                    # Mirroring the image
-                                    img_pil = Image.open(file_path)  # opens the image using PIL
-                                    mirrored = ImageOps.mirror(img_pil)  # mirrors the image
-                                    mirrored_path = os.path.join(subroot, f'mirrored_{file}')  # creates the path for the mirrored image
-                                    mirrored.save(mirrored_path)  # saves the mirrored image
-                                '''
+                                # Rotating the image
+                                def rotate_image(image, angle):
+                                    (h, w) = image.shape[:2]
+                                    center = (w / 2, h / 2)
+                                    M = cv2.getRotationMatrix2D(center, angle, 1.0)
+                                    rotated = cv2.warpAffine(image, M, (w, h))
+                                    return rotated
+
                                 for angle in [90, 180, 270]:
-                                    rotated_img = cv2.Rotate(angle)
-                                    rota
+                                    rotated = rotate_image(img, angle)
+                                    rotated_path = os.path.join(subroot, f'rotated_{angle}_{file}')
+                                    cv2.imwrite(rotated_path, rotated)
 
-                                print(f'Processed {file}')  # prints the name of the processed file
+                                # Brightness adjustment
+                                enhancer = ImageEnhance.Brightness(img_pil)
+                                brightened = enhancer.enhance(1.5)
+                                brightened_path = os.path.join(subroot, f'brightened_{file}')
+                                brightened.save(brightened_path)
 
+                                # Contrast adjustment
+                                enhancer = ImageEnhance.Contrast(img_pil)
+                                contrasted = enhancer.enhance(2)
+                                contrasted_path = os.path.join(subroot, f'contrasted_{file}')
+                                contrasted.save(contrasted_path)
+
+                                print(f'Processed {file}')
                             except Exception as e:
                                 print(f'Error processing file {file_path}: {e}')
 
