@@ -1,1 +1,2 @@
 name,model,train_time,eval_time,pred_one_time,accuracy,precision,recall,f1
+owenclary,Original-CNN-Kaggle,2108.412269,13.264337,0.074639,0.1235356762513312,1.0,0.1235356762513312,0.2199052132701421
