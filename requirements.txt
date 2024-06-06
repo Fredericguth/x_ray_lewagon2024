@@ -5,4 +5,6 @@ pandas==1.5.3
 tensorflow==2.16.1
 keras==3.0
 shap==0.41.0
-
+opencv-python==4.9.0.80
+pillow==10.3.0
+split-folders==0.5.1
