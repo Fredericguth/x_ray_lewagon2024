@@ -26,13 +26,13 @@ def augment_images(directory):
 
                             try:
                                 img = cv2.imread(file_path)
-                                
+
                                 if img is None:
                                     print(f'Warning: Could not read image file {file_path}')
                                     continue
 
                                 # Blurring the image
-                                blurred = cv2.GaussianBlur(img, (25, 25), 0)
+                                blurred = cv2.GaussianBlur(img, (10, 10), 0)
                                 blurred_path = os.path.join(subroot, f'blurred_{file}')
                                 cv2.imwrite(blurred_path, blurred)
 
@@ -57,13 +57,13 @@ def augment_images(directory):
 
                                 # Brightness adjustment
                                 enhancer = ImageEnhance.Brightness(img_pil)
-                                brightened = enhancer.enhance(1.5)
+                                brightened = enhancer.enhance(1)
                                 brightened_path = os.path.join(subroot, f'brightened_{file}')
                                 brightened.save(brightened_path)
 
                                 # Contrast adjustment
                                 enhancer = ImageEnhance.Contrast(img_pil)
-                                contrasted = enhancer.enhance(2)
+                                contrasted = enhancer.enhance(1)
                                 contrasted_path = os.path.join(subroot, f'contrasted_{file}')
                                 contrasted.save(contrasted_path)
 
